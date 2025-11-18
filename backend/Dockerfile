@@ -1,4 +1,4 @@
-FROM node:18-bullseye AS builder
+FROM node:20-bullseye AS builder
 WORKDIR /app
 
 # Install system deps required to build native modules (sharp, bcrypt, etc.)
@@ -11,15 +11,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-# Install production dependencies only. Use --omit=dev to skip devDeps and
-# --legacy-peer-deps to avoid strict peer-dependency resolution inside the
-# build environment (avoids failures coming from dev tooling peer deps).
-RUN npm install --omit=dev --legacy-peer-deps --no-audit --no-fund --no-progress
+# Prefer Corepack-provided Yarn (Node 20 includes Corepack). If Yarn is not
+# available, fall back to installing yarn globally. Use yarn to install deps.
+RUN corepack enable || true
+RUN if ! command -v yarn >/dev/null 2>&1; then npm install -g yarn@stable || true; fi
+RUN yarn install --non-interactive
 
 COPY . .
-RUN npm run build
+# Build the project using Yarn (requires dev deps installed in builder)
+RUN yarn build
 
-FROM node:18-bullseye-slim
+# Keep node_modules from the builder (includes necessary runtime deps)
+
+FROM node:20-bullseye-slim
 WORKDIR /app
 
 # Copy production node_modules and built dist from builder

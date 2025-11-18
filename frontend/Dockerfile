@@ -1,12 +1,11 @@
 FROM node:20-bullseye AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN command -v yarn >/dev/null 2>&1 || npm install -g yarn@latest
+RUN yarn install --non-interactive
 COPY . .
-RUN npm run build
-
-# Remove dev dependencies to leave only production deps
-RUN npm prune --production
+RUN yarn build
+RUN yarn workspaces focus --production --all || true
 
 FROM node:20-bullseye-slim
 WORKDIR /app
