@@ -15,7 +15,7 @@ if [ -f /etc/apt/keyrings/docker.gpg ]; then
 fi
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-# Add Docker apt repository (expand command substitutions properly)
+# compute architecture/codename and write the apt source using a heredoc
 ARCH=$(dpkg --print-architecture)
 CODENAME=$(lsb_release -cs)
 cat > /etc/apt/sources.list.d/docker.list <<EOF
