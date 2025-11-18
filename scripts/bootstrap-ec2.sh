@@ -9,6 +9,11 @@ apt-get update
 apt-get install -y ca-certificates curl gnupg lsb-release git
 
 mkdir -p /etc/apt/keyrings
+if [ -f /etc/apt/keyrings/docker.gpg ]; then
+  echo "Backing up existing /etc/apt/keyrings/docker.gpg"
+  mv /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/docker.gpg.bak.$(date -u +"%Y%m%dT%H%M%SZ") || true
+fi
+
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 # Add Docker apt repository (expand command substitutions properly)
