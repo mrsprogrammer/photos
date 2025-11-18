@@ -1,16 +1,22 @@
-FROM node:18-alpine AS builder
+FROM node:20-bullseye AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine
+# Remove dev dependencies to leave only production deps
+RUN npm prune --production
+
+FROM node:20-bullseye-slim
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Copy built app and production deps
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-RUN npm install --production
+COPY --from=builder /app/node_modules ./node_modules
+
 EXPOSE 3000
 CMD ["npm", "run", "start"]
