@@ -1,17 +1,30 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Install Docker and Docker Compose
+# Non-interactive apt
+export DEBIAN_FRONTEND=noninteractive
+
+# Install prerequisites
 apt-get update
 apt-get install -y ca-certificates curl gnupg lsb-release git
+
 mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\" > /etc/apt/sources.list.d/docker.list
+
+# Add Docker apt repository (expand command substitutions properly)
+ARCH=$(dpkg --print-architecture)
+CODENAME=$(lsb_release -cs)
+cat > /etc/apt/sources.list.d/docker.list <<EOF
+deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${CODENAME} stable
+EOF
+
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 # Add ubuntu user to docker group (assuming default user)
-usermod -aG docker ubuntu || true
+if id ubuntu &>/dev/null; then
+  usermod -aG docker ubuntu || true
+fi
 
 # Clone repo (replace with your repo url if needed)
 cd /home/ubuntu
