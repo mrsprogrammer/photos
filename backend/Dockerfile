@@ -11,8 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-# Use npm ci for reproducible installs (falls back to npm install if lockfile missing)
-RUN npm ci --only=production || npm install --production
+# Install production dependencies only. Use --omit=dev to skip devDeps and
+# --legacy-peer-deps to avoid strict peer-dependency resolution inside the
+# build environment (avoids failures coming from dev tooling peer deps).
+RUN npm install --omit=dev --legacy-peer-deps --no-audit --no-fund --no-progress
 
 COPY . .
 RUN npm run build
