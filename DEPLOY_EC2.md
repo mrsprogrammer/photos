@@ -17,7 +17,7 @@ Deployment on EC2 (Ubuntu) - bootstrap guide
 4) Notes
 - The script clones the repository from GitHub. If your repo is private, change the clone step to use your deploy key or add your SSH key to the instance.
 - The script installs Docker and docker compose plugin and runs `docker compose -f docker-compose.prod.yml up -d --build`.
-- `NEXT_PUBLIC_API_URL` is set in the compose file to `http://localhost:3002`. If you want it to be accessible externally you can change the value to `http://<EC2_IP>:3002` or place a reverse proxy (Nginx) in front.
+- `BACKEND_API_URL` is set in the compose file to `http://localhost:3002`. If you want it to be accessible externally you can change the value to `http://<EC2_IP>:3002` or place a reverse proxy (Nginx) in front.
 
 5) Optional: Use Cloud-Init user-data to set TIMEZONE, LOCALE, or run additional scripts.
 

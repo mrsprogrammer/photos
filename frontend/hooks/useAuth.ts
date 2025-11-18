@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+const API = process.env.BACKEND_URL || "http://localhost:3002";
 
 function getTokenFromResponse(data: any) {
   return data?.accessToken || data?.access_token || data?.token || data?.jwt;
