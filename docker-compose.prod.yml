@@ -39,10 +39,10 @@ services:
       - "3000:3000"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`my-photo-album.duckdns.org`)"
+      - "traefik.http.routers.frontend.rule=Host(`my-photo-album.pl`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend.tls.certresolver=le"
+      - "traefik.http.routers.frontend.tls=true"
     depends_on:
       - backend
     networks:
@@ -55,11 +55,9 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker=true
+      - --providers.file.filename=/certs/dynamic.yml
       - --entryPoints.web.address=:80
       - --entryPoints.websecure.address=:443
-      - --certificatesResolvers.le.acme.email=justynazubala@gmail.com
-      - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
-      - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
     ports:
       - "80:80"
       - "443:443"
@@ -67,6 +65,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_lets_encrypt:/letsencrypt
+      - ./traefik:/certs:ro
     networks:
       - appnet
 
@@ -77,3 +76,10 @@ volumes:
 networks:
   appnet:
     driver: bridge
+
+tls:
+  certificates:
+    - certFile: ./traefik/my-photo-album.pl.certificate.pem
+      keyFile: ./traefik/my-photo-album.pl.key.txt
+      stores:
+        - default
