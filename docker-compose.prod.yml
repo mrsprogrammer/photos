@@ -57,7 +57,7 @@ services:
       - --providers.docker=true
       - --entryPoints.web.address=:80
       - --entryPoints.websecure.address=:443
-      - --certificatesResolvers.le.acme.email=you@example.com
+      - --certificatesResolvers.le.acme.email=justynazubala@gmail.com
       - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
       - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
     ports:
