@@ -49,7 +49,7 @@ services:
       - appnet
 
   traefik:
-    image: traefik:v2.10
+    image: traefik:latest
     environment:
       - DOCKER_API_VERSION=1.44
     command:
