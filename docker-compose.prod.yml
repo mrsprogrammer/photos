@@ -77,9 +77,3 @@ networks:
   appnet:
     driver: bridge
 
-tls:
-  certificates:
-    - certFile: ./traefik/my-photo-album.pl.certificate.pem
-      keyFile: ./traefik/my-photo-album.pl.key.txt
-      stores:
-        - default
