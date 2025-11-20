@@ -37,13 +37,40 @@ services:
       NEXT_PUBLIC_API_URL: ${FRONTEND_URL}
     ports:
       - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`my-photo-album.duckdns.org)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend.tls.certresolver=le"
     depends_on:
       - backend
     networks:
       - appnet
 
+  traefik:
+    image: traefik:v2.10
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entryPoints.web.address=:80
+      - --entryPoints.websecure.address=:443
+      - --certificatesResolvers.le.acme.email=you@example.com
+      - --certificatesResolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # traefik dashboard (insecure)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_lets_encrypt:/letsencrypt
+    networks:
+      - appnet
+
 volumes:
   pgdata:
+  traefik_lets_encrypt:
 
 networks:
   appnet:
