@@ -11,6 +11,9 @@ FROM node:20-bullseye-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
 # Copy built app and production deps
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
