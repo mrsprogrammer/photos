@@ -11,3 +11,10 @@ Deployment:
 
 Ignored files: *.pem, node_modules, .env, build artifacts.
 
+
+## Deployment and Hosting
+
+- Live site: https://my-photo-album.pl/
+- Hosting: this project is deployed to an AWS EC2 instance.
+- Containerization: the project uses Docker and Docker Compose for building and running the frontend and backend services.
+
