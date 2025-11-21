@@ -33,7 +33,7 @@ services:
       context: ./frontend
     env_file: .env
     environment:
-      NEXT_PUBLIC_API_URL: ${FRONTEND_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_FRONTEND_URL}
     ports:
       - "3000:3000"
     labels:
