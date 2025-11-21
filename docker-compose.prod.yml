@@ -23,6 +23,14 @@ services:
       PORT: ${PORT}
     ports:
       - "3002:3002"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`my-photo-album.pl`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.services.backend.loadbalancer.server.port=3002"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.middlewares=strip-api"
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
     depends_on:
       - postgres
     networks:
