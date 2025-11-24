@@ -38,7 +38,7 @@ export default function SignUpPage() {
     setLoading(true);
     try {
       await signUp(u, p);
-      router.replace("/");
+      router.replace("/signin");
       return;
     } catch (err: any) {
       setError(err?.message || "Sign up failed");
@@ -90,11 +90,7 @@ export default function SignUpPage() {
               {error && <div className="text-sm text-red-600">{error}</div>}
 
               <div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
+                <button type="submit" disabled={loading} className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   {loading ? "Creating..." : "Create account"}
                 </button>
               </div>

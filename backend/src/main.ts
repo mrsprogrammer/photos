@@ -10,10 +10,33 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
+  // Allow a configurable list of frontend origins (comma-separated) and
+  // fall back to localhost for development.
+  const rawOrigins =
+    process.env.FRONTEND_URLS ||
+    process.env.FRONTEND_URL ||
+    process.env.NEXT_PUBLIC_FRONTEND_URL ||
+    'http://localhost:3000';
+  const allowedOrigins = rawOrigins
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: process.env.NEXT_PUBLIC_FRONTEND_URL,
+    origin: (origin, callback) => {
+      // allow server-to-server or tools like curl (no origin)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Origin not allowed by CORS'), false);
+    },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+    ],
     credentials: true,
     maxAge: 86400,
   });
