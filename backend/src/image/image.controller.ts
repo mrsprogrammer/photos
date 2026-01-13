@@ -75,6 +75,14 @@ export class ImageController {
       throw new BadRequestException('User not authenticated');
     }
 
+    // Check image limit (10 per user)
+    const userImages = await this.imageService.getUserImages(userId);
+    if (userImages.length >= 10) {
+      throw new BadRequestException(
+        'Image limit reached (max 10 images per user)',
+      );
+    }
+
     const image = await this.imageService.saveImageMetadata({
       userId,
       s3Key,
@@ -102,13 +110,19 @@ export class ImageController {
     }
 
     const images = await this.imageService.getUserImages(userId);
-    return images.map((img) => ({
-      id: img.id,
-      filename: img.filename,
-      fileSize: img.fileSize,
-      uploadedAt: img.uploadedAt,
-      s3Key: img.s3Key,
-    }));
+    return Promise.all(
+      images.map(async (img) => {
+        const url = await this.s3Service.getPresignedGetUrl(img.s3Key);
+        return {
+          id: img.id,
+          filename: img.filename,
+          fileSize: img.fileSize,
+          uploadedAt: img.uploadedAt,
+          s3Key: img.s3Key,
+          url,
+        };
+      }),
+    );
   }
 
   // get single image metadata
@@ -122,12 +136,14 @@ export class ImageController {
       throw new BadRequestException('Image not found or access denied');
     }
 
+    const url = await this.s3Service.getPresignedGetUrl(image.s3Key);
     return {
       id: image.id,
       filename: image.filename,
       fileSize: image.fileSize,
       uploadedAt: image.uploadedAt,
       s3Key: image.s3Key,
+      url,
     };
   }
 
