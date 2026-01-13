@@ -68,10 +68,12 @@ export function useAuth() {
   }, []);
 
   const getUserId = useCallback(() => {
+    if (typeof window === "undefined") return "";
     return localStorage.getItem("userId") || "";
   }, []);
 
   const getToken = useCallback(() => {
+    if (typeof window === "undefined") return "";
     return localStorage.getItem("token") || "";
   }, []);
 
