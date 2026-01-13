@@ -58,6 +58,7 @@ export function useAuth() {
 
   const signOut = useCallback(() => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     router.push("/signin");
   }, [router]);
 
@@ -66,7 +67,15 @@ export function useAuth() {
     return !!t;
   }, []);
 
-  return { signIn, signUp, signOut, isAuthenticated } as const;
+  const getUserId = useCallback(() => {
+    return localStorage.getItem("userId") || "";
+  }, []);
+
+  const getToken = useCallback(() => {
+    return localStorage.getItem("token") || "";
+  }, []);
+
+  return { signIn, signUp, signOut, isAuthenticated, getUserId, getToken } as const;
 }
 
 export function useRequireAuth() {
@@ -111,6 +120,10 @@ export function useRequireAuth() {
 
         // valid token
         setChecking(false);
+        const userData = await res.json();
+        if (userData?.id) {
+          localStorage.setItem("userId", userData.id);
+        }
       } catch (err) {
         // network/error - try fallback to local token, otherwise redirect
         if (isAuthenticated()) {

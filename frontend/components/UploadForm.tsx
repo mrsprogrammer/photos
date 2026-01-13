@@ -6,22 +6,23 @@ import { useAuth } from "@/hooks/useAuth";
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
 export default function UploadForm() {
-  const { isAuthenticated } = useAuth();
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const { isAuthenticated, getUserId, getToken } = useAuth();
+  const userId = getUserId();
+  const token = getToken();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   async function handleUpload() {
-    if (!file || !isAuthenticated()) return;
+    if (!file || !token || !isAuthenticated()) return;
     setUploading(true);
     setError(null);
     setSuccess(false);
 
     try {
       // 1. request presigned url
-      const signRes = await fetch(`${BACKEND}/images/sign`, {
+      const signRes = await fetch(`${BACKEND}/images/sign?userId=${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
