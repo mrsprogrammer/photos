@@ -21,17 +21,31 @@ export class AuthService {
   ) {}
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
+    const { email, password } = authCredentialsDto;
     const salt = await bcrypt.genSalt();
     const hashed = await bcrypt.hash(password, salt);
 
-    const user = this.usersRepository.create({ username, password: hashed });
+    // Generate unique username from email (e.g., test1234_gmail from test1234@gmail.com)
+    const [emailUser, emailDomain] = email.split('@');
+    const domainName = emailDomain.split('.')[0];
+    const username = `${emailUser}_${domainName}`;
+
+    const user = this.usersRepository.create({
+      email,
+      username,
+      password: hashed,
+    });
 
     try {
       await this.usersRepository.save(user);
     } catch (error) {
       if ((error as any)?.code === '23505') {
-        throw new ConflictException('Username already exists');
+        const constraint = (error as any)?.constraint;
+        if (constraint === 'UQ_4a204e4e7fc1d2df18c0c6d5e7') {
+          throw new ConflictException('Email already exists');
+        } else {
+          throw new ConflictException('Username already exists');
+        }
       } else {
         throw new InternalServerErrorException();
       }
@@ -41,11 +55,13 @@ export class AuthService {
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
-    const { username, password } = authCredentialsDto;
-    const user = await this.usersRepository.findOne({ where: { username } });
+    const { email, password } = authCredentialsDto;
+    const user = await this.usersRepository.findOne({
+      where: { email },
+    });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const payload: JwtPayload = { username };
+      const payload: JwtPayload = { username: user.username };
       const accessToken: string = await this.jwtService.sign(payload);
       return { accessToken };
     } else {

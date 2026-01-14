@@ -11,11 +11,11 @@ function getTokenFromResponse(data: any) {
 export function useAuth() {
   const router = useRouter();
 
-  const signIn = useCallback(async (username: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API}/auth/signin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
@@ -32,11 +32,11 @@ export function useAuth() {
   }, []);
 
   const signUp = useCallback(
-    async (username: string, password: string) => {
+    async (email: string, password: string) => {
       const res = await fetch(`${API}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (res.status !== 201) {
@@ -46,7 +46,7 @@ export function useAuth() {
 
       // try to sign in automatically
       try {
-        const token = await signIn(username, password);
+        const token = await signIn(email, password);
         return token;
       } catch (err) {
         // if signin fails, surface that error
