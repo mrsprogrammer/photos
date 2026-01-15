@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRequireAuth } from "../hooks/useAuth";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "./../components/Avatar";
@@ -63,7 +64,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <header className="flex items-center justify-between p-4 border-b bg-white">
-        <h1 className="text-lg sm:text-xl font-semibold">My Photos</h1>
+        <Link className="text-center" href="/">
+          <img src="/logo.png" alt="PHOTO HUB" className="h-34 w-auto mx-auto rounded-lg" />
+        </Link>
         <div className="flex items-center gap-3">
           <Avatar />
         </div>

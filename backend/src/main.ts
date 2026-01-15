@@ -10,6 +10,11 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
+  // Serve static files from uploads directory (for local storage)
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
+  });
+
   // Allow a configurable list of frontend origins (comma-separated) and
   // fall back to localhost for development.
   const rawOrigins =

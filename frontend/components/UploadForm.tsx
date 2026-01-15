@@ -21,7 +21,7 @@ export default function UploadForm() {
     setSuccess(false);
 
     try {
-      // 1. request presigned url
+      // 1. request presigned url or upload endpoint
       const signRes = await fetch(`${BACKEND}/images/sign?userId=${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,13 +33,30 @@ export default function UploadForm() {
       if (!signRes.ok) throw new Error("Failed to get presigned URL");
       const { url, key } = await signRes.json();
 
-      // 2. PUT file to S3
-      const putRes = await fetch(url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type || "application/octet-stream" },
-        body: file,
-      });
-      if (!putRes.ok) throw new Error("S3 upload failed");
+      // 2a. For S3: PUT file to presigned URL
+      // 2b. For local: POST file as multipart form data
+      let uploadUrl = url;
+      const isS3Url = url.includes("s3") || url.includes("amazonaws");
+
+      if (isS3Url) {
+        // S3: PUT with raw binary
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file,
+        });
+        if (!putRes.ok) throw new Error("S3 upload failed");
+      } else {
+        // Local: POST as multipart form data
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("key", key);
+        const postRes = await fetch(uploadUrl, {
+          method: "POST",
+          body: formData,
+        });
+        if (!postRes.ok) throw new Error("Local upload failed");
+      }
 
       // 3. save image metadata to database
       const saveRes = await fetch(`${BACKEND}/images`, {

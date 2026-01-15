@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres:15
@@ -71,7 +73,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080" # traefik dashboard (insecure)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_lets_encrypt:/letsencrypt

@@ -7,4 +7,6 @@ dist/
 .next/
 coverage/
 traefik/
+docker-compose.yml
+/backend/uploads/
  

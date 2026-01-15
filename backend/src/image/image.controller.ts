@@ -27,29 +27,42 @@ export class ImageController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('image'))
-  async upload(@UploadedFile() file: Express.Multer.File) {
-    const url = await this.imageService.saveImage(file);
-    return { url };
+  async upload(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body?: { key?: string },
+  ) {
+    const key = body?.key;
+    const result = await this.imageService.saveImage(file, key);
+    return { key: result };
   }
 
-  // returns presigned PUT url and the S3 key to use
+  // returns presigned PUT url (S3) or direct upload URL (local)
   @Post('sign')
   async sign(
     @Body() body: { filename?: string; contentType?: string },
     @Query('userId') userId?: string,
   ) {
-    if (!this.s3Service.hasBucket()) {
-      throw new BadRequestException('S3 not configured on server');
-    }
+    const storageType = process.env.STORAGE_TYPE || 'local';
     const { filename, contentType } = body || {};
     if (!filename || !contentType)
       throw new BadRequestException('filename and contentType required');
 
-    // sanitize filename simple
     const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, '-');
-    const key = `${userId || 'anonymous'}/${Date.now()}-${safeName}`;
-    const url = await this.s3Service.getPresignedPutUrl(key, contentType);
-    return { url, key };
+
+    if (storageType === 's3') {
+      if (!this.s3Service.hasBucket()) {
+        throw new BadRequestException('S3 not configured on server');
+      }
+      // For S3: include userId in the key
+      const key = `${userId || 'anonymous'}/${Date.now()}-${safeName}`;
+      const url = await this.s3Service.getPresignedPutUrl(key, contentType);
+      return { url, key };
+    } else {
+      // For local: key without userId (will be stored in uploads/ root)
+      const key = `${Date.now()}-${safeName}`;
+      const backendUrl = process.env.BACKEND_URL || 'http://localhost:3002';
+      return { url: `${backendUrl}/images/upload`, key };
+    }
   }
 
   // save image metadata after successful S3 upload
@@ -112,7 +125,7 @@ export class ImageController {
     const images = await this.imageService.getUserImages(userId);
     return Promise.all(
       images.map(async (img) => {
-        const url = await this.s3Service.getPresignedGetUrl(img.s3Key);
+        const url = await this.imageService.getPresignedGetUrl(img.s3Key);
         return {
           id: img.id,
           filename: img.filename,
@@ -136,7 +149,7 @@ export class ImageController {
       throw new BadRequestException('Image not found or access denied');
     }
 
-    const url = await this.s3Service.getPresignedGetUrl(image.s3Key);
+    const url = await this.imageService.getPresignedGetUrl(image.s3Key);
     return {
       id: image.id,
       filename: image.filename,

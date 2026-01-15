@@ -77,7 +77,7 @@ export default function SignUpPage() {
   return (
     <>
       <Head>
-        <title>Sign up — Photos</title>
+        <title>Sign up — PHOTO HUB</title>
         <meta name="description" content="Create an account" />
       </Head>
 
@@ -85,7 +85,7 @@ export default function SignUpPage() {
         <div className="w-full max-w-md">
           {/* Header Section */}
           <div className="text-center">
-            <img src="/logo.png" alt="Photos Logo" className="h-44 w-auto mx-auto rounded-lg" />
+            <img src="/logo.png" alt="PHOTO HUB" className="h-44 w-auto mx-auto rounded-lg" />
           </div>
 
           {/* Main Form Card */}

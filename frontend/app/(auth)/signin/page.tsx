@@ -67,7 +67,7 @@ export default function SignInPage() {
   return (
     <>
       <Head>
-        <title>Sign in — Photos</title>
+        <title>Sign in — PHOTO HUB</title>
         <meta name="description" content="Sign in to your account" />
       </Head>
 
@@ -75,7 +75,7 @@ export default function SignInPage() {
         <div className="w-full max-w-md">
           {/* Header Section */}
           <div className="text-center">
-            <img src="/logo.png" alt="Photos Logo" className="h-44 w-auto mx-auto rounded-lg" />
+            <img src="/logo.png" alt="PHOTO HUB" className="h-44 w-auto mx-auto rounded-lg" />
           </div>
           <div className="bg-white shadow-xl rounded-2xl p-8 border border-black border-opacity-10">
             {/* Main Form Card */}
