@@ -3,6 +3,8 @@
 import React, { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useClickOutside from "@/hooks/useClickOutside";
+import ButtonPrimaryBlack from "./buttons/ButtonPrimaryBlack";
+import ButtonSecondaryBlack from "./buttons/ButtonSecondaryBlack";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -103,12 +105,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}>
-      <div ref={modalRef} className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-md w-full">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(255, 255, 255, 0.80)" }}>
+      <div ref={modalRef} className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-lg w-full border-2 border-black">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b dark:border-zinc-700">
           <h2 className="text-xl font-semibold">Upload Photo</h2>
-          <button onClick={onClose} disabled={uploading} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50">
+          <button onClick={onClose} disabled={uploading} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50 cursor-pointer">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -116,25 +118,28 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-4">
-          <div className="border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg p-6">
-            <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} disabled={uploading} className="w-full" />
-            {file && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Selected: {file.name}</p>}
+        <div className="p-8 space-y-6">
+          <div className="border-2 border-dashed border-gray-300 dark:border-zinc-600 rounded-lg p-8">
+            <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} disabled={uploading} className="w-full cursor-pointer hover:underline" />
           </div>
 
-          {error && <div className="p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">{error}</div>}
+          {error && <div className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded text-sm">{error}</div>}
 
-          {success && <div className="p-3 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded text-sm">✓ Upload successful!</div>}
+          {success && <div className="p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded text-sm">✓ Upload successful!</div>}
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 border-t dark:border-zinc-700">
-          <button onClick={onClose} disabled={uploading} className="flex-1 px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50">
-            Cancel
-          </button>
-          <button onClick={handleUpload} disabled={!file || uploading || !isAuthenticated()} className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400">
-            {uploading ? "Uploading..." : "Upload"}
-          </button>
+        <div className="flex gap-3 p-6">
+          <div className="flex-1">
+            <ButtonSecondaryBlack onClick={onClose} disabled={uploading}>
+              Cancel
+            </ButtonSecondaryBlack>
+          </div>
+          <div className="flex-1">
+            <ButtonPrimaryBlack onClick={handleUpload} disabled={!file || uploading || !isAuthenticated()}>
+              {uploading ? "Uploading..." : "Upload"}
+            </ButtonPrimaryBlack>
+          </div>
         </div>
       </div>
     </div>
