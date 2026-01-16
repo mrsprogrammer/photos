@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRequireAuth } from "../hooks/useAuth";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "./../components/Avatar";
+import UploadModal from "./../components/UploadModal";
 import { useEffect, useState } from "react";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
@@ -21,6 +22,7 @@ export default function Home() {
   const { getToken } = useAuth();
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (checking) return; // wait for auth check
@@ -48,6 +50,31 @@ export default function Home() {
     fetchImages();
   }, [checking, getToken]);
 
+  const handleUploadSuccess = () => {
+    // Refresh images after successful upload
+    if (checking) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    const fetchImages = async () => {
+      try {
+        const res = await fetch(`${BACKEND}/images`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch images");
+        const data = await res.json();
+        setImages(data);
+      } catch (err) {
+        console.error("Error fetching images:", err);
+      }
+    };
+
+    fetchImages();
+  };
+
   if (checking) {
     return (
       <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black flex items-center justify-center">
@@ -68,6 +95,9 @@ export default function Home() {
           <img src="/logo.png" alt="PHOTO HUB" className="h-34 w-auto mx-auto rounded-lg" />
         </Link>
         <div className="flex items-center gap-3">
+          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm sm:text-base">
+            + Upload
+          </button>
           <Avatar />
         </div>
       </header>
@@ -94,6 +124,8 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      <UploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onUploadSuccess={handleUploadSuccess} />
     </div>
   );
 }

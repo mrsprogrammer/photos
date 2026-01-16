@@ -41,9 +41,6 @@ export default function Avatar() {
                 </Link>
               ) : (
                 <div className="space-y-2">
-                  <Link href="/upload" className="block w-full text-center px-4 py-3 text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
-                    Upload photos
-                  </Link>
                   <button
                     onClick={() => {
                       setOpen(false);
@@ -67,9 +64,6 @@ export default function Avatar() {
                 </Link>
               ) : (
                 <>
-                  <Link href="/upload" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Upload photos
-                  </Link>
                   <button
                     onClick={() => {
                       setOpen(false);
