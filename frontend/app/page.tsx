@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRequireAuth } from "../hooks/useAuth";
 import { useAuth } from "../hooks/useAuth";
 import SignOutButton from "../components/SignOutButton";
+import Sidebar from "../components/Sidebar";
 import UploadModal from "./../components/UploadModal";
 import { useEffect, useState } from "react";
 import ButtonPrimaryBlack from "@/components/buttons/ButtonPrimaryBlack";
@@ -90,39 +91,38 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
-      <header className="flex items-center justify-between p-4 border-b bg-white">
-        <Link className="text-center" href="/">
-          <img src="/logo.png" alt="PHOTO HUB" className="h-34 w-auto mx-auto rounded-lg" />
-        </Link>
-        <div className="flex items-center gap-3">
-          <ButtonPrimaryBlack onClick={() => setIsModalOpen(true)}>Upload</ButtonPrimaryBlack>
-          <SignOutButton />
-        </div>
-      </header>
+    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black flex">
+      <Sidebar onUploadClick={() => setIsModalOpen(true)} />
+      <div className="flex-1 ml-64 flex flex-col">
+        <header className="flex items-center justify-end p-4 border-b bg-white h-32">
+          <div className="flex items-center gap-3">
+            <SignOutButton />
+          </div>
+        </header>
 
-      <main className="p-4 sm:p-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <svg className="animate-spin h-12 w-12 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"></circle>
-              <path className="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"></path>
-            </svg>
-          </div>
-        ) : images.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="whitespace-nowrap">No photos yet. Upload one!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {images.map((image) => (
-              <div key={image.id} className="w-full rounded-md overflow-hidden shadow-sm bg-gray-200 h-36 sm:h-40 md:h-44 lg:h-48">
-                <img src={image.url} alt={image.filename} className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+        <main className="p-4 sm:p-6 flex-1">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <svg className="animate-spin h-12 w-12 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"></circle>
+                <path className="opacity-100" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"></path>
+              </svg>
+            </div>
+          ) : images.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <p className="whitespace-nowrap">No photos yet. Upload one!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {images.map((image) => (
+                <div key={image.id} className="w-full rounded-md overflow-hidden shadow-sm bg-gray-200 h-36 sm:h-40 md:h-44 lg:h-48">
+                  <img src={image.url} alt={image.filename} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
 
       <UploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onUploadSuccess={handleUploadSuccess} />
     </div>
