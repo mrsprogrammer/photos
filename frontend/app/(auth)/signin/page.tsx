@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../hooks/useAuth";
+import ButtonPrimaryBlack from "@/components/buttons/ButtonPrimaryBlack";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -152,7 +153,7 @@ export default function SignInPage() {
               </div>
 
               {/* Submit Button */}
-              <button type="submit" disabled={loading} className="w-full py-2.5 px-4 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+              <ButtonPrimaryBlack type="submit" disabled={loading}>
                 {loading ? (
                   <>
                     <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -169,7 +170,7 @@ export default function SignInPage() {
                     </svg>
                   </>
                 )}
-              </button>
+              </ButtonPrimaryBlack>
               <p className="text-gray-700 mt-6 text-center">
                 Don't have an account?{" "}
                 <Link className="font-semibold text-black hover:text-gray-700 transition-colors" href="/signup">

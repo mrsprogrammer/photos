@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import ButtonPrimaryBlack from "./buttons/ButtonPrimaryBlack";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -89,9 +90,9 @@ export default function UploadForm() {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} disabled={uploading} />
-        <button className="px-3 py-1 bg-indigo-600 text-white rounded disabled:bg-gray-400" onClick={handleUpload} disabled={!file || uploading || !isAuthenticated()}>
+        <ButtonPrimaryBlack onClick={handleUpload} disabled={!file || uploading || !isAuthenticated()}>
           {uploading ? "Uploading..." : "Upload"}
-        </button>
+        </ButtonPrimaryBlack>
       </div>
       {error && <div className="text-red-600 text-sm">{error}</div>}
       {success && <div className="text-green-600 text-sm">✓ Upload successful!</div>}

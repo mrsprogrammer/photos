@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useRequireAuth } from "../hooks/useAuth";
 import { useAuth } from "../hooks/useAuth";
-import Avatar from "./../components/Avatar";
+import SignOutButton from "../components/SignOutButton";
 import UploadModal from "./../components/UploadModal";
 import { useEffect, useState } from "react";
+import ButtonPrimaryBlack from "@/components/buttons/ButtonPrimaryBlack";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -95,10 +96,8 @@ export default function Home() {
           <img src="/logo.png" alt="PHOTO HUB" className="h-34 w-auto mx-auto rounded-lg" />
         </Link>
         <div className="flex items-center gap-3">
-          <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm sm:text-base">
-            + Upload
-          </button>
-          <Avatar />
+          <ButtonPrimaryBlack onClick={() => setIsModalOpen(true)}>Upload</ButtonPrimaryBlack>
+          <SignOutButton />
         </div>
       </header>
 
@@ -112,7 +111,7 @@ export default function Home() {
           </div>
         ) : images.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <p>No photos yet. Upload one!</p>
+            <p className="whitespace-nowrap">No photos yet. Upload one!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
