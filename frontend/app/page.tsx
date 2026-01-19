@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import SignOutButton from "../components/SignOutButton";
 import Sidebar from "../components/Sidebar";
 import UploadModal from "./../components/UploadModal";
+import ConfirmDeleteModal from "./../components/ConfirmDeleteModal";
 import { useEffect, useState } from "react";
 import ButtonPrimaryBlack from "@/components/buttons/ButtonPrimaryBlack";
 
@@ -25,6 +26,8 @@ export default function Home() {
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (checking) return; // wait for auth check
@@ -77,6 +80,30 @@ export default function Home() {
     fetchImages();
   };
 
+  const handleDeleteImage = async (imageId: string) => {
+    const token = getToken();
+    if (!token) return;
+
+    setDeletingImageId(imageId);
+    try {
+      const res = await fetch(`${BACKEND}/images/${imageId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete image");
+
+      // Remove image from state
+      setImages(images.filter((img) => img.id !== imageId));
+      setImageToDelete(null);
+    } catch (err) {
+      console.error("Error deleting image:", err);
+      alert("Failed to delete image");
+    } finally {
+      setDeletingImageId(null);
+    }
+  };
+
   if (checking) {
     return (
       <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black flex items-center justify-center">
@@ -118,8 +145,20 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {images.map((image) => (
-                <div key={image.id} className="w-full overflow-hidden aspect-[3/2] flex items-center justify-center border border-gray-300  rounded-lg">
+                <div key={image.id} className="relative w-full overflow-hidden aspect-[3/2] flex items-center justify-center border border-gray-300 rounded-lg group">
                   <img src={image.url} alt={image.filename} className="w-full h-full object-contain" />
+                  <button onClick={() => setImageToDelete(image.id)} disabled={deletingImageId === image.id} className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed" aria-label="Delete photo">
+                    {deletingImageId === image.id ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
@@ -128,6 +167,7 @@ export default function Home() {
       </div>
 
       <UploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onUploadSuccess={handleUploadSuccess} />
+      <ConfirmDeleteModal isOpen={imageToDelete !== null} onClose={() => setImageToDelete(null)} onConfirm={() => imageToDelete && handleDeleteImage(imageToDelete)} isDeleting={deletingImageId !== null} />
     </div>
   );
 }

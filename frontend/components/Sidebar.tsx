@@ -43,7 +43,7 @@ export default function Sidebar({ onUploadClick }: SidebarProps) {
             setIsOpen(false);
           }}
         >
-          + Upload photo
+          + Upload photos
         </ButtonSecondaryBlack>
       </div>
     </>
