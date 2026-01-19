@@ -93,14 +93,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black flex">
       <Sidebar onUploadClick={() => setIsModalOpen(true)} />
-      <div className="flex-1 ml-64 flex flex-col">
-        <header className="flex items-center justify-end p-4 border-b bg-white ">
+      <div className="flex-1 ml-20 md:ml-64 flex flex-col">
+        <header className="fixed top-0 right-0 left-20 md:left-64 flex items-center justify-between md:justify-end px-4 py-2 md:py-4 border-b bg-white min-h-[104px] z-20">
+          <Link href="/" className="md:hidden flex items-center overflow-hidden h-20">
+            <img src="/logo.png" alt="PHOTO HUB" className="h-28 w-auto object-cover rounded-lg -my-1.5" />
+          </Link>
           <div className="flex items-center gap-3">
             <SignOutButton />
           </div>
         </header>
 
-        <main className="p-8 sm:p-12 flex-1">
+        <main className="p-8 sm:p-12 flex-1 mt-[104px]">
           {loading ? (
             <div className="flex justify-center py-12">
               <svg className="animate-spin h-12 w-12 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -113,9 +116,9 @@ export default function Home() {
               <p className="whitespace-nowrap">No photos yet. Upload one!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {images.map((image) => (
-                <div key={image.id} className="w-full overflow-hidden aspect-[3/2] flex items-center justify-center border border-black bg-black rounded-lg">
+                <div key={image.id} className="w-full overflow-hidden aspect-[3/2] flex items-center justify-center border border-gray-300  rounded-lg">
                   <img src={image.url} alt={image.filename} className="w-full h-full object-contain" />
                 </div>
               ))}
