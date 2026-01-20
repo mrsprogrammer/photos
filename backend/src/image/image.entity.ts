@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Label } from './label.entity';
 
 @Entity('images')
 export class Image {
@@ -28,6 +31,14 @@ export class Image {
 
   @Column({ default: 'active' })
   status: string; // active, deleted, archived
+
+  @ManyToMany(() => Label, (label) => label.images)
+  @JoinTable({
+    name: 'image_labels',
+    joinColumn: { name: 'imageId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'labelId', referencedColumnName: 'id' },
+  })
+  labels: Label[];
 
   @CreateDateColumn()
   uploadedAt: Date;

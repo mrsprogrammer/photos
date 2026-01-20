@@ -116,15 +116,27 @@ export class ImageController {
   // get all images for authenticated user
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getUserImages(@Req() req: any) {
+  async getUserImages(@Req() req: any, @Query('labels') labels?: string) {
     const userId = req.user?.id || req.user?.sub;
     if (!userId) {
       throw new BadRequestException('User not authenticated');
     }
 
     const images = await this.imageService.getUserImages(userId);
+
+    // Filter by labels if provided
+    let filteredImages = images;
+    if (labels) {
+      const labelArray = labels.split(',').map((l) => l.trim().toLowerCase());
+      filteredImages = images.filter((img) =>
+        labelArray.every((labelName) =>
+          img.labels?.some((label) => label.name.toLowerCase() === labelName),
+        ),
+      );
+    }
+
     return Promise.all(
-      images.map(async (img) => {
+      filteredImages.map(async (img) => {
         const url = await this.imageService.getPresignedGetUrl(img.s3Key);
         return {
           id: img.id,
@@ -133,9 +145,38 @@ export class ImageController {
           uploadedAt: img.uploadedAt,
           s3Key: img.s3Key,
           url,
+          labels: img.labels || [],
         };
       }),
     );
+  }
+
+  // Get all available labels - MUST BE BEFORE :id routes
+  @Get('labels/all')
+  @UseGuards(JwtAuthGuard)
+  async getAllLabels() {
+    return this.imageService.getAllLabels();
+  }
+
+  // Create new label - MUST BE BEFORE :id routes
+  @Post('labels/new')
+  @UseGuards(JwtAuthGuard)
+  async createLabel(@Body() body: { name: string; color?: string }) {
+    const { name, color } = body;
+    if (!name) {
+      throw new BadRequestException('Label name is required');
+    }
+
+    return this.imageService.createLabel(name, color);
+  }
+
+  // Delete label (removes from all images) - MUST BE BEFORE :id routes
+  @Delete('labels/:labelId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
+  async deleteLabel(@Param('labelId') labelId: string) {
+    await this.imageService.deleteLabel(labelId);
+    return;
   }
 
   // get single image metadata
@@ -157,6 +198,7 @@ export class ImageController {
       uploadedAt: image.uploadedAt,
       s3Key: image.s3Key,
       url,
+      labels: image.labels || [],
     };
   }
 
@@ -174,5 +216,64 @@ export class ImageController {
 
     await this.imageService.deleteImage(imageId);
     return;
+  }
+
+  // Add label to image
+  @Post(':id/labels')
+  @UseGuards(JwtAuthGuard)
+  async addLabelToImage(
+    @Param('id') imageId: string,
+    @Body() body: { name: string; color?: string },
+    @Req() req: any,
+  ) {
+    const userId = req.user?.id || req.user?.sub;
+    const image = await this.imageService.getImage(imageId);
+
+    if (!image || image.userId !== userId) {
+      throw new BadRequestException('Image not found or access denied');
+    }
+
+    const { name, color } = body;
+    if (!name) {
+      throw new BadRequestException('Label name is required');
+    }
+
+    const updatedImage = await this.imageService.addLabelToImage(
+      imageId,
+      name,
+      color,
+    );
+
+    return {
+      id: updatedImage.id,
+      labels: updatedImage.labels,
+    };
+  }
+
+  // Remove label from image
+  @Delete(':id/labels/:labelId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  async removeLabelFromImage(
+    @Param('id') imageId: string,
+    @Param('labelId') labelId: string,
+    @Req() req: any,
+  ) {
+    const userId = req.user?.id || req.user?.sub;
+    const image = await this.imageService.getImage(imageId);
+
+    if (!image || image.userId !== userId) {
+      throw new BadRequestException('Image not found or access denied');
+    }
+
+    const updatedImage = await this.imageService.removeLabelFromImage(
+      imageId,
+      labelId,
+    );
+
+    return {
+      id: updatedImage.id,
+      labels: updatedImage.labels,
+    };
   }
 }

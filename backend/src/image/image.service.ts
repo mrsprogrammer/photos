@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import { S3Service } from './s3.service';
 import { ImageRepository } from './image.repository';
+import { LabelRepository } from './label.repository';
 
 @Injectable()
 export class ImageService {
@@ -14,6 +19,7 @@ export class ImageService {
   constructor(
     private readonly s3Service?: S3Service,
     private readonly imageRepository?: ImageRepository,
+    private readonly labelRepository?: LabelRepository,
   ) {
     // Create uploads directory only for local storage
     if (this.storageType === 'local' && !fs.existsSync(this.uploadPath)) {
@@ -36,7 +42,9 @@ export class ImageService {
       return s3Key;
     } else {
       // Save to local filesystem
-      const filename = key || `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '-')}`;
+      const filename =
+        key ||
+        `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '-')}`;
       const filePath = path.join(this.uploadPath, filename);
       await fs.promises.writeFile(filePath, buffer);
       return filename;
@@ -85,5 +93,82 @@ export class ImageService {
       throw new Error('Database not configured');
     }
     return this.imageRepository.softDelete(imageId);
+  }
+
+  // Label management methods
+  async addLabelToImage(imageId: string, labelName: string, color?: string) {
+    if (!this.imageRepository || !this.labelRepository) {
+      throw new Error('Database not configured');
+    }
+
+    const image = await this.imageRepository.findById(imageId);
+    if (!image) {
+      throw new NotFoundException(`Image with ID ${imageId} not found`);
+    }
+
+    // Find or create label
+    const label = await this.labelRepository.findOrCreate(labelName, color);
+
+    // Check if label already exists on image
+    if (image.labels && image.labels.some((l) => l.id === label.id)) {
+      throw new BadRequestException('Label already exists on this image');
+    }
+
+    // Add label to image
+    if (!image.labels) {
+      image.labels = [];
+    }
+    image.labels.push(label);
+    await this.imageRepository.save(image);
+
+    return image;
+  }
+
+  async removeLabelFromImage(imageId: string, labelId: string) {
+    if (!this.imageRepository || !this.labelRepository) {
+      throw new Error('Database not configured');
+    }
+
+    const image = await this.imageRepository.findById(imageId);
+    if (!image) {
+      throw new NotFoundException(`Image with ID ${imageId} not found`);
+    }
+
+    if (!image.labels || !image.labels.some((l) => l.id === labelId)) {
+      throw new NotFoundException('Label not found on this image');
+    }
+
+    // Remove label from image
+    image.labels = image.labels.filter((l) => l.id !== labelId);
+    await this.imageRepository.save(image);
+
+    return image;
+  }
+
+  async getAllLabels() {
+    if (!this.labelRepository) {
+      throw new Error('Database not configured');
+    }
+    return this.labelRepository.getAllLabels();
+  }
+
+  async createLabel(name: string, color?: string) {
+    if (!this.labelRepository) {
+      throw new Error('Database not configured');
+    }
+
+    const existingLabel = await this.labelRepository.findByName(name);
+    if (existingLabel) {
+      throw new BadRequestException('Label with this name already exists');
+    }
+
+    return this.labelRepository.findOrCreate(name, color);
+  }
+
+  async deleteLabel(labelId: string) {
+    if (!this.labelRepository) {
+      throw new Error('Database not configured');
+    }
+    await this.labelRepository.deleteLabel(labelId);
   }
 }

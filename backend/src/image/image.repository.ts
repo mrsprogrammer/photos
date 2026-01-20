@@ -26,11 +26,15 @@ export class ImageRepository extends Repository<Image> {
     return this.find({
       where: { userId, status: 'active' },
       order: { uploadedAt: 'DESC' },
+      relations: ['labels'],
     });
   }
 
   async findById(id: string): Promise<Image | null> {
-    return this.findOne({ where: { id, status: 'active' } });
+    return this.findOne({
+      where: { id, status: 'active' },
+      relations: ['labels'],
+    });
   }
 
   async softDelete(id: string) {

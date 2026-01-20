@@ -1,15 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ButtonSecondaryBlack from "./buttons/ButtonSecondaryBlack";
+import ButtonPrimaryBlack from "./buttons/ButtonPrimaryBlack";
+import CreateLabelModal from "./CreateLabelModal";
+import { useAuth } from "../hooks/useAuth";
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+
+interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
 
 interface SidebarProps {
   onUploadClick: () => void;
+  selectedLabels: string[];
+  onLabelToggle: (labelName: string) => void;
+  onClearFilters: () => void;
 }
 
-export default function Sidebar({ onUploadClick }: SidebarProps) {
+export default function Sidebar({ onUploadClick, selectedLabels, onLabelToggle, onClearFilters }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreateLabelModalOpen, setIsCreateLabelModalOpen] = useState(false);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    fetchLabels();
+  }, []);
+
+  const fetchLabels = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${BACKEND}/images/labels/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLabels(data);
+      }
+    } catch (err) {
+      console.error("Error fetching labels:", err);
+    }
+  };
+
+  const handleLabelCreated = () => {
+    fetchLabels();
+  };
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -30,22 +72,64 @@ export default function Sidebar({ onUploadClick }: SidebarProps) {
       {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={toggleSidebar}></div>}
 
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-screen w-full md:w-64 flex flex-col items-center gap-12 border-r-2 border-black px-6 bg-white z-40 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+      <div className={`fixed left-0 top-0 h-screen w-full md:w-64 flex flex-col items-start gap-6 border-r-2 border-black px-6 pt-0 pb-6 bg-white z-40 transition-transform duration-300 overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         {/* Logo */}
-        <Link href="/" className="flex items-center justify-center w-full h-26">
+        <Link href="/" className="flex items-center justify-center w-full">
           <img src="/logo.png" alt="PHOTO HUB" className="w-32 h-auto rounded-lg overflow-hidden" />
         </Link>
 
         {/* Upload Button */}
-        <ButtonSecondaryBlack
+        <ButtonPrimaryBlack
+          size="big"
           onClick={() => {
             onUploadClick();
             setIsOpen(false);
           }}
         >
           + Upload photos
-        </ButtonSecondaryBlack>
+        </ButtonPrimaryBlack>
+
+        {/* Labels Section */}
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-gray-700">Labels:</h3>
+            <div className="flex gap-2">
+              {selectedLabels.length > 0 && (
+                <ButtonSecondaryBlack
+                  size="medium"
+                  onClick={() => {
+                    onClearFilters();
+                    setIsOpen(false);
+                  }}
+                >
+                  Clear
+                </ButtonSecondaryBlack>
+              )}
+              <ButtonPrimaryBlack size="medium" onClick={() => setIsCreateLabelModalOpen(true)}>
+                + New
+              </ButtonPrimaryBlack>
+            </div>
+          </div>
+
+          {/* Label List with checkboxes */}
+          <div className="space-y-1 max-h-[400px] overflow-y-auto">
+            {labels.length === 0 ? (
+              <p className="text-xs text-gray-400 px-3 py-2">No labels yet</p>
+            ) : (
+              labels.map((label) => (
+                <button key={label.id} onClick={() => onLabelToggle(label.name)} className={`w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer ${selectedLabels.includes(label.name) ? "bg-black text-white" : "hover:bg-gray-100 text-gray-700"}`}>
+                  <span className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: label.color }}></span>
+                    <span className="text-sm flex-1">{label.name}</span>
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
       </div>
+
+      <CreateLabelModal isOpen={isCreateLabelModalOpen} onClose={() => setIsCreateLabelModalOpen(false)} onLabelCreated={handleLabelCreated} />
     </>
   );
 }
