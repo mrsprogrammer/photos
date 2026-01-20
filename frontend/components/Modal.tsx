@@ -22,7 +22,7 @@ export default function Modal({ isOpen, onClose, title, children, footer, closeD
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: "rgba(255, 255, 255, 0.80)" }}>
-      <div ref={modalRef} className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-lg w-full border-2 border-black">
+      <div ref={modalRef} className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg max-w-lg w-full border-2 border-black relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b dark:border-zinc-700">
           <h2 className="text-xl font-semibold">{title}</h2>

@@ -150,7 +150,7 @@ export default function Home() {
       <div className="flex-1 ml-20 md:ml-64 flex flex-col">
         <header className="fixed top-0 right-0 left-20 md:left-64 flex items-center justify-between md:justify-end px-4 py-2 md:py-4 border-b bg-white min-h-[104px] z-20">
           <Link href="/" className="md:hidden flex items-center overflow-hidden h-20">
-            <img src="/logo.svg" alt="Logo" className="h-full w-auto object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-full w-auto object-contain" />
           </Link>
           <SignOutButton />
         </header>
@@ -167,7 +167,7 @@ export default function Home() {
                   </button>
                 </span>
               ))}
-              <button onClick={() => setSelectedLabels([])} className="text-sm text-gray-500 hover:text-black underline">
+              <button onClick={() => setSelectedLabels([])} className="text-sm text-gray-500 hover:text-black underline cursor-pointer">
                 Clear all
               </button>
             </div>

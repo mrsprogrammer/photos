@@ -30,8 +30,11 @@ export default function AddLabel({ imageId, existingLabels, onLabelAdded }: AddL
   const predefinedColors = ["#FF5733", "#33FF57", "#3357FF", "#FF33F5", "#F5FF33", "#FF8C33", "#8C33FF", "#33FF8C", "#FF338C", "#33FFF5"];
 
   useEffect(() => {
-    fetchAllLabels();
-  }, []);
+    // Fetch labels only when modal is opened
+    if (isOpen) {
+      fetchAllLabels();
+    }
+  }, [isOpen]);
 
   const fetchAllLabels = async () => {
     const token = getToken();

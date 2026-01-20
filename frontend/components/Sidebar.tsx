@@ -72,7 +72,7 @@ export default function Sidebar({ onUploadClick, selectedLabels, onLabelToggle, 
       {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={toggleSidebar}></div>}
 
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-screen w-full md:w-64 flex flex-col items-start gap-6 border-r-2 border-black px-6 pt-0 pb-6 bg-white z-40 transition-transform duration-300 overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+      <div className={`fixed left-20 md:left-0 top-0 h-screen w-[calc(100%-80px)] md:w-64 flex flex-col items-start gap-6 border-r-2 border-black px-6 pt-0 pb-6 bg-white z-40 transition-transform duration-300 overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
         {/* Logo */}
         <Link href="/" className="flex items-center justify-center w-full">
           <img src="/logo.png" alt="PHOTO HUB" className="w-32 h-auto rounded-lg overflow-hidden" />
